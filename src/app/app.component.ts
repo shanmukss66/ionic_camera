@@ -68,20 +68,23 @@ export class AppComponent implements OnInit {
   async setTitleName() {
     let a:string = (this.status).split('@', 1);
     const data = await Plugins.Storage.get({ key: a });
-    this.temp = await Plugins.Storage.get({ key: a+ 'photo' });
+    if(await Plugins.Storage.get({ key: a+ 'photo' })!=null){
+      this.temp = await Plugins.Storage.get({ key: a+ 'photo' });
+      this.url=  JSON.parse(this.temp.value)  ;
+    
+    
+    
 
+    
+      this.photo=this.dom.bypassSecurityTrustResourceUrl(this.url.dataUrl);
+    }
+    
     this.hide_settings = false;
     this.hide_signup = true;
     this.hide_signin=true;
     this.hide_signout=false;
     this.fullname = (JSON.parse(data.value)).fname + " " + JSON.parse(data.value).lname;
-    this.url=  JSON.parse(this.temp.value)  ;
     
-    
-    
-
-    
-     this.photo=this.dom.bypassSecurityTrustResourceUrl(this.url.dataUrl);
   }
 
 
