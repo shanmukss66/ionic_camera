@@ -1,11 +1,22 @@
 <ion-app>
   
   <ion-menu side="start" content-id="main-content" menuId="main-menu">
-    <ion-header>
-      <ion-toolbar style="height: 100px;" color="primary"  translucent>
-        <ion-title style="padding-left: 85px; padding-top: 45px;">{{fullname}}</ion-title>
-      </ion-toolbar>
+    <ion-header style="height: 200px; background-color: rgb(255, 208, 0);" >
+      
+        <img [hidden]="img_hide" style="width: 80px; height: 80px; position: absolute; left: 25px; top:55px;" [src]="photo">
+        <ion-title style="position: absolute; left: 93px; top:75px;">{{fullname}}</ion-title>
+      
     </ion-header>
+    <ion-footer>
+      <ion-toolbar>
+        <ion-menu-toggle>
+          <ion-item (click)="clearStorage()">
+            <ion-icon name="trash" slot="start"></ion-icon>
+            <ion-label>Clear Storage</ion-label>
+          </ion-item>
+        </ion-menu-toggle>     
+      </ion-toolbar>
+    </ion-footer>
     <ion-content>
       <ion-list>
         <ion-menu-toggle>
@@ -15,7 +26,7 @@
           </ion-item>
         </ion-menu-toggle>
         <ion-menu-toggle>
-          <ion-item routerLink="/signin">
+          <ion-item [hidden]="hide_signin" routerLink="/signin">
             <ion-icon name="person" slot="start"></ion-icon>
             <ion-label>SignIn</ion-label>
           </ion-item>
@@ -31,6 +42,12 @@
             <ion-icon name="settings" slot="start"></ion-icon>
             <ion-label>Edit Profile</ion-label>
           </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle>
+          <ion-item [hidden]="hide_signout" (click)="onClickSignout()"  routerLink="/home">
+            <ion-icon name="exit" slot="start"></ion-icon>
+            <ion-label>Sign Out</ion-label>
+          </ion-item >
         </ion-menu-toggle>
         
         

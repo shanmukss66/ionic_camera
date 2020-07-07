@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { DataService } from '../services/behavior.service';
-import {Plugins,CameraResultType,CameraSource, Camera} from '@capacitor/core';
-import {DomSanitizer,SafeResourceUrl} from '@angular/platform-browser';
+import { Plugins, CameraResultType, CameraSource, Camera } from '@capacitor/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { StorageService } from '../services/storage.service';
 
@@ -14,52 +14,104 @@ import { StorageService } from '../services/storage.service';
 export class EditprofilePage implements OnInit {
   status;
   a;
-  reactive_signup= new FormGroup({
-    fname:new FormControl('',Validators.required),
-    lname:new FormControl('',Validators.required),
-    email:new FormControl('',Validators.required),
-    phone:new FormControl('',Validators.required),
-    password:new FormControl('',Validators.required),
-    gender:new FormControl('',Validators.required)
+  edit_details={};
+  split_email: string;
+  image;
+  reactive_signup = new FormGroup({
+    fname: new FormControl('', Validators.required),
+    lname: new FormControl('', Validators.required),
+    email: new FormControl('', Validators.required),
+    phone: new FormControl('', Validators.required),
+    password: new FormControl('', Validators.required),
+    gender: new FormControl('', Validators.required)
   })
-  photo:SafeResourceUrl
-  constructor(private dataservice: DataService,private sanitizer:DomSanitizer,private router:Router,private storageservice:StorageService) { }
+  photo: SafeResourceUrl
+  converter: string;
+  constructor(private dataservice: DataService, private sanitizer: DomSanitizer, private router: Router, private storageservice: StorageService) { }
 
-  ngOnInit() {
+ ngOnInit() {
     this.dataservice.data.subscribe(data1 => {
-      this.status=data1;
-      this.a=this.status;
-      if(this.status!=null){
-        this.reactive_signup.setValue({
-          fname:JSON.parse(localStorage.getItem(this.status)).fname,
-          lname:JSON.parse(localStorage.getItem(this.status)).lname,
-          phone:JSON.parse(localStorage.getItem(this.status)).phone,
-          email:JSON.parse(localStorage.getItem(this.status)).email,
-          password:JSON.parse(localStorage.getItem(this.status)).password,
-          gender:JSON.parse(localStorage.getItem(this.status)).gender
-  
-  
-        })
+      this.status = data1;
+      this.a = this.status;
+      
+     
+      if (this.status != null) {
+       this.getStorageDetails();
       }
-      
-      
+
+
     })
   }
-  onclickSubmit(){
+  onclickSubmit() {
+
     
-      localStorage.setItem(this.status,JSON.stringify(this.reactive_signup.value));
+
+    this.edit_details = {
+
+      email: this.reactive_signup.get('email').value,
+      lname: this.reactive_signup.get('lname').value,
+      fname: this.reactive_signup.get('fname').value,
+      password: this.reactive_signup.get('password').value,
+      phone: this.reactive_signup.get('phone').value,
+      gender: this.reactive_signup.get('gender').value,
+
+    }
+    this.converter = JSON.stringify(this.edit_details);
+    this.loadStorage();
     
-      this.router.navigate(['/signin']);
-    
+
   }
-  async clickPicture(){
-  const image= await Plugins.Camera.getPhoto({
-    quality:100,
-    allowEditing:false,
-    resultType:CameraResultType.DataUrl,
-    source:CameraSource.Camera,
-  })
-  this.photo=this.sanitizer.bypassSecurityTrustResourceUrl(image && image.dataUrl);
+  async getStorageDetails(){
+    this.split_email = (this.a).split('@', 1);
+      const data = await Plugins.Storage.get({ key: this.split_email });
+       
+      this.reactive_signup.setValue({
+        fname: JSON.parse(data.value).fname,
+        lname: JSON.parse(data.value).lname,
+        phone: JSON.parse(data.value).phone,
+        email: JSON.parse(data.value).email,
+        password: JSON.parse(data.value).password,
+        gender: JSON.parse(data.value).gender
+
+
+      })
+      
+   }
+
+   loadStorage() {
+     if(this.split_email!=this.reactive_signup.get('email').value){
+      Plugins.Storage.set({ key: (this.reactive_signup.get('email').value).split('@',1), value: this.converter });
+      Plugins.Storage.set({ key: (this.reactive_signup.get('email').value).split('@',1)+"photo", value: JSON.stringify(this.image) });
+     }
+     else{
+      Plugins.Storage.set({ key: this.split_email, value: this.converter });
+      Plugins.Storage.set({ key: this.split_email+"photo", value: JSON.stringify(this.image) });
+      console.log('hello');
+      
+      
+     }
+   
+
+    this.router.navigate(['/signin']);
+  }
+  async clickPicture() {
+    this.image = await Plugins.Camera.getPhoto({
+      quality: 100,
+      allowEditing: false,
+      
+      resultType: CameraResultType.DataUrl,
+      source: CameraSource.Camera,
+    })
+    this.split_email = this.status.split('@', 1);
+    console.log(this.split_email);
+
+
+
+    this.photo = this.sanitizer.bypassSecurityTrustResourceUrl(this.image && this.image.dataUrl);
+
+    
+
   }
 
+  
 }
